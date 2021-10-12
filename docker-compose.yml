@@ -1,0 +1,34 @@
+version: "3.2"
+services:
+  project:
+    restart: always
+    container_name: code
+    command : bash -c "python task/manage.py makemigrations &&
+                      python task/manage.py migrate &&
+                      python task/manage.py runserver 0.0.0.0:8000"
+    build:
+      context: ./beckend/
+      dockerfile: python.Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - db-net
+
+  frontend:
+    restart: always
+    command : npm start
+    container_name: front
+    build:
+      context: ./groupusers-fe/
+      dockerfile: node.Dockerfile
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    depends_on:
+      - project
+    networks:
+      - db-net
+
+networks:
+  db-net:
+    driver: bridge
